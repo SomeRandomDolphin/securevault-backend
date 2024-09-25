@@ -61,6 +61,7 @@
     "http-status-codes": "^2.2.0",
     "joi": "^17.9.2",
     "jsonwebtoken": "^9.0.1",
+    "prettier": "^3.3.3",
     "serve-favicon": "^2.5.0"
   }
 }
