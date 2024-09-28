@@ -5,6 +5,7 @@ import { encryptData, decryptData } from "../Utils/Encryption";
 import { queryUserDetailbyUsername } from "../repository/UserRepository";
 import {
   createFile,
+  queryAllFilebyUserID,
   queryFileDetailbyID,
   removeFile,
 } from "../repository/FileRepository";
@@ -30,6 +31,20 @@ export const uploadFile = async (data: FileRequest, username: string) => {
 
   if (!userFile) {
     throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid Data");
+  }
+
+  return userFile;
+};
+
+export const listFile = async (username: string) => {
+  const user = await queryUserDetailbyUsername(username);
+  if (!user) {
+    throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
+  }
+
+  const userFile = await queryAllFilebyUserID(user.id);
+  if (!userFile) {
+    throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
   }
 
   return userFile;

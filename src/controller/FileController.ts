@@ -16,6 +16,22 @@ export const uploadFile = async (req: Request, res: Response) => {
   }
 };
 
+export const listFile = async (req: Request, res: Response) => {
+  try {
+    const username = (req as UserToken).user.username;
+    const userFile = await FileService.listFile(username);
+
+    responseData(
+      res,
+      StatusCodes.OK,
+      "File List Retrieved Successfully",
+      userFile,
+    );
+  } catch (err) {
+    responseError(res, err);
+  }
+};
+
 export const retrieveFile = async (req: Request, res: Response) => {
   try {
     const username = (req as UserToken).user.username;
