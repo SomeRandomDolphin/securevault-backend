@@ -6,6 +6,7 @@ import path from "path";
 
 import authRouter from "./router/AuthRouter";
 import userRouter from "./router/UserRouter";
+import fileRouter from "./router/FileRouter";
 
 const app: Express = express();
 const PORT = env.PORT || 80;
@@ -16,9 +17,10 @@ app.use(favicon(path.join(__dirname, "public", "favicon.ico")));
 
 app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
+app.use("/api/files", fileRouter);
 
 app.get("/api", (_: Request, res: Response) => {
-  res.send("Nouriva API!");
+  res.send("Secure Vault API!");
 });
 
 app.listen(PORT, () => {

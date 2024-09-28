@@ -11,6 +11,8 @@ const env = cleanEnv(
     PORT: num(),
     SECRET_ACCESS_TOKEN: str(),
     HASH_SALT: str(),
+    SUPABASE_URL: url(),
+    SUPABASE_KEY: str(),
   },
   {
     reporter: ({ errors, env }) => {

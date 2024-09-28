@@ -37,7 +37,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/express": "^4.17.17",
+    "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.12",
     "@types/node": "^20.4.9",
     "@typescript-eslint/eslint-plugin": "^6.3.0",
     "@typescript-eslint/parser": "^6.3.0",
@@ -55,12 +56,14 @@
     "@commitlint/cli": "^17.7.1",
     "@commitlint/config-conventional": "^17.7.0",
     "@prisma/client": "^5.1.1",
+    "@supabase/supabase-js": "^2.45.4",
     "bcrypt": "^5.1.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "http-status-codes": "^2.2.0",
     "joi": "^17.9.2",
     "jsonwebtoken": "^9.0.1",
+    "multer": "^1.4.5-lts.1",
     "prettier": "^3.3.3",
     "serve-favicon": "^2.5.0"
   }
