@@ -46,9 +46,13 @@ export const retrieveFile = async (fileId: string, username: string) => {
     throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid ID");
   }
 
-  const buffer = Buffer.from(await (userFile.data as { arrayBuffer(): Promise<ArrayBuffer> }).arrayBuffer());
+  const buffer = Buffer.from(
+    await (
+      userFile.data as { arrayBuffer(): Promise<ArrayBuffer> }
+    ).arrayBuffer(),
+  );
   const decryptedData = decryptData(buffer, user.password);
-  
+
   return decryptedData;
 };
 

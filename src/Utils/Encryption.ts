@@ -17,23 +17,38 @@ export const encryptData = (data: Buffer, password: string): Buffer => {
   algorithms.forEach((algo) => {
     const salt = crypto.randomBytes(16);
     const key = deriveKey(password, salt.toString("hex"), algo.keyLength);
-    const iv = algo.ivLength > 0 ? crypto.randomBytes(algo.ivLength) : Buffer.alloc(0);
+    const iv =
+      algo.ivLength > 0 ? crypto.randomBytes(algo.ivLength) : Buffer.alloc(0);
     const cipher = crypto.createCipheriv(algo.name, key, iv);
-    encryptedData = Buffer.concat([cipher.update(encryptedData), cipher.final()]);
+    encryptedData = Buffer.concat([
+      cipher.update(encryptedData),
+      cipher.final(),
+    ]);
     metaData.push(Buffer.concat([salt, iv]));
   });
 
-  const finalData = Buffer.concat([Buffer.concat(metaData.reverse()), encryptedData]);
+  const finalData = Buffer.concat([
+    Buffer.concat(metaData.reverse()),
+    encryptedData,
+  ]);
   return finalData;
 };
 
-export const decryptData = (encryptedData: Buffer, password: string): Buffer => {
+export const decryptData = (
+  encryptedData: Buffer,
+  password: string,
+): Buffer => {
   let data = encryptedData;
   let offset = 0;
 
-  const totalMetadataLength = algorithms.reduce((sum, algo) => sum + 16 + algo.ivLength, 0);
+  const totalMetadataLength = algorithms.reduce(
+    (sum, algo) => sum + 16 + algo.ivLength,
+    0,
+  );
   if (data.length <= totalMetadataLength) {
-    throw new Error(`Encrypted data is too short. Length: ${data.length}, Expected: > ${totalMetadataLength}`);
+    throw new Error(
+      `Encrypted data is too short. Length: ${data.length}, Expected: > ${totalMetadataLength}`,
+    );
   }
 
   const metaData = data.slice(0, totalMetadataLength);
@@ -45,16 +60,21 @@ export const decryptData = (encryptedData: Buffer, password: string): Buffer => 
     const totalLength = saltLength + algo.ivLength;
 
     const salt = metaData.slice(offset, offset + saltLength);
-    const iv = algo.ivLength > 0 ? metaData.slice(offset + saltLength, offset + totalLength) : Buffer.alloc(0);
+    const iv =
+      algo.ivLength > 0
+        ? metaData.slice(offset + saltLength, offset + totalLength)
+        : Buffer.alloc(0);
     offset += totalLength;
 
     const key = deriveKey(password, salt.toString("hex"), algo.keyLength);
     const decipher = crypto.createDecipheriv(algo.name, key, iv);
-    
+
     try {
       data = Buffer.concat([decipher.update(data), decipher.final()]);
     } catch (error) {
-      throw new Error(`Decryption failed for algorithm ${algo.name}: ${error.message}`);
+      throw new Error(
+        `Decryption failed for algorithm ${algo.name}: ${error.message}`,
+      );
     }
   }
 
