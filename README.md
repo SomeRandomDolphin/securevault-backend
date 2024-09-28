@@ -114,7 +114,7 @@ Error
 
 ## API Documentation
 
-Please refer to this [postman](https://documenter.getpostman.com/view/28923101/2s9Xy6ppZo#dfd6374b-9322-4424-93ef-70738ab61e44)
+Please refer to this [postman](https://documenter.getpostman.com/view/38586883/2sAXqzVcs2)
 
 ## References
 
