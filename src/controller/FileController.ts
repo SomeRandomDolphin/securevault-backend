@@ -21,7 +21,6 @@ export const retrieveFile = async (req: Request, res: Response) => {
     const username = (req as UserToken).user.username;
     const fileId = req.params.file_id;
     const userFile = await FileService.retrieveFile(fileId, username);
-    console.log(userFile)
 
     res.setHeader("Content-Disposition", `attachment; filename="${fileId}"`);
     res.send(userFile);

@@ -1,13 +1,22 @@
 import { Router } from "express";
 import multer from "multer";
-import { uploadFile, retrieveFile, deleteFile } from "../controller/FileController";
+import {
+  uploadFile,
+  retrieveFile,
+  deleteFile,
+} from "../controller/FileController";
 import { userAuthMiddleware } from "../middleware/AuthMiddleware";
 
 const fileRouter = Router();
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-fileRouter.post("/upload", userAuthMiddleware, upload.single("file"), uploadFile);
+fileRouter.post(
+  "/upload",
+  userAuthMiddleware,
+  upload.single("file"),
+  uploadFile,
+);
 fileRouter.get("/:file_id", userAuthMiddleware, retrieveFile);
 fileRouter.delete("/:file_id", userAuthMiddleware, deleteFile);
 
