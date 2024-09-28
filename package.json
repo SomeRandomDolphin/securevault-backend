@@ -11,6 +11,7 @@
     "start:dev": "cross-env ENVIRONMENT=development NODE_OPTIONS=--openssl-legacy-provider nodemon -L src/index.ts",
     "start:prod": "cross-env ENVIRONMENT=production NODE_OPTIONS=--openssl-legacy-provider ts-node src/index.ts",
     "build": "nest build",
+    "postinstall": "prisma generate",
     "deploy:dev": "NODE_OPTIONS=--openssl-legacy-provider pm2 startOrRestart ecosystem.config.js --env development --update-env --log-date-format 'DD-MM HH:mm:ss.SSS'",
     "deploy:prod": "NODE_OPTIONS=--openssl-legacy-provider pm2 startOrRestart ecosystem.config.js --env production --update-env --log-date-format 'DD-MM HH:mm:ss.SSS'",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
