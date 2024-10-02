@@ -9,61 +9,35 @@ export const createFile = async (
   buffer: Buffer,
   userId: number,
 ) => {
-  try {
-    const { data, error } = await supabase.storage
-      .from("user_data")
-      .upload(`${userId}/${Date.now()}-${originalname}`, buffer, { contentType: mimetype });
+  const data = await supabase.storage
+    .from("user_data")
+    .upload(userId + "/" + originalname, buffer, { contentType: mimetype });
 
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error("Error uploading file:", error);
-    throw error;
-  }
+  return data;
 };
 
 export const queryAllFilebyUserID = async (userId: number) => {
-  try {
-    const { data, error } = await supabase.storage
-      .from("user_data")
-      .list(String(userId), {
-        limit: 100,
-        offset: 0,
-        sortBy: { column: "name", order: "asc" },
-      });
+  const data = await supabase.storage.from("user_data").list(String(userId), {
+    limit: 100,
+    offset: 0,
+    sortBy: { column: "name", order: "asc" },
+  });
 
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error("Error listing files:", error);
-    throw error;
-  }
+  return data;
 };
 
 export const queryFileDetailbyID = async (fileId: string, userId: number) => {
-  try {
-    const { data, error } = await supabase.storage
-      .from("user_data")
-      .download(`${userId}/${fileId}`);
+  const data = await supabase.storage
+    .from("user_data")
+    .download(userId + "/" + fileId);
 
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error("Error downloading file:", error);
-    throw error;
-  }
+  return data;
 };
 
 export const removeFile = async (fileId: string, userId: number) => {
-  try {
-    const { data, error } = await supabase.storage
-      .from("user_data")
-      .remove([`${userId}/${fileId}`]);
+  const data = await supabase.storage
+    .from("user_data")
+    .remove([userId + "/" + fileId]);
 
-    if (error) throw error;
-    return data;
-  } catch (error) {
-    console.error("Error removing file:", error);
-    throw error;
-  }
+  return data;
 };
