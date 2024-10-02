@@ -9,35 +9,61 @@ export const createFile = async (
   buffer: Buffer,
   userId: number,
 ) => {
-  const data = await supabase.storage
-    .from("user_data")
-    .upload(userId + "/" + originalname, buffer, { contentType: mimetype });
+  try {
+    const { data, error } = await supabase.storage
+      .from("user_data")
+      .upload(`${userId}/${Date.now()}-${originalname}`, buffer, { contentType: mimetype });
 
-  return data;
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw error;
+  }
 };
 
 export const queryAllFilebyUserID = async (userId: number) => {
-  const data = await supabase.storage.from("user_data").list(String(userId), {
-    limit: 100,
-    offset: 0,
-    sortBy: { column: "name", order: "asc" },
-  });
+  try {
+    const { data, error } = await supabase.storage
+      .from("user_data")
+      .list(String(userId), {
+        limit: 100,
+        offset: 0,
+        sortBy: { column: "name", order: "asc" },
+      });
 
-  return data;
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error listing files:", error);
+    throw error;
+  }
 };
 
 export const queryFileDetailbyID = async (fileId: string, userId: number) => {
-  const data = await supabase.storage
-    .from("user_data")
-    .download(userId + "/" + fileId);
+  try {
+    const { data, error } = await supabase.storage
+      .from("user_data")
+      .download(`${userId}/${fileId}`);
 
-  return data;
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error downloading file:", error);
+    throw error;
+  }
 };
 
 export const removeFile = async (fileId: string, userId: number) => {
-  const data = await supabase.storage
-    .from("user_data")
-    .remove([userId + "/" + fileId]);
+  try {
+    const { data, error } = await supabase.storage
+      .from("user_data")
+      .remove([`${userId}/${fileId}`]);
 
-  return data;
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error removing file:", error);
+    throw error;
+  }
 };

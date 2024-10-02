@@ -11,76 +11,92 @@ import {
 } from "../repository/FileRepository";
 
 export const uploadFile = async (data: FileRequest, username: string) => {
-  const user = await queryUserDetailbyUsername(username);
-  if (!user) {
-    throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
+  try {
+    const user = await queryUserDetailbyUsername(username);
+    if (!user) {
+      throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
+    }
+
+    if (!data || !data.buffer) {
+      throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid File");
+    }
+
+    const fileName = `${Date.now()}-${data.originalname}`;
+    const encryptedData = encryptData(data.buffer, user.password);
+    const userFile = await createFile(
+      fileName,
+      data.mimetype,
+      encryptedData,
+      user.id,
+    );
+
+    return userFile;
+  } catch (error) {
+    console.error("Error in uploadFile:", error);
+    if (error instanceof CustomError) {
+      throw error;
+    }
+    throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, "File upload failed");
   }
-
-  if (!data) {
-    throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid File");
-  }
-
-  const fileName = Date.now() + "-" + data.originalname;
-  const encryptedData = encryptData(data.buffer, user.password);
-  const userFile = await createFile(
-    fileName,
-    data.mimetype,
-    encryptedData,
-    user.id,
-  );
-
-  if (!userFile) {
-    throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid Data");
-  }
-
-  return userFile;
 };
 
 export const listFile = async (username: string) => {
-  const user = await queryUserDetailbyUsername(username);
-  if (!user) {
-    throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
-  }
+  try {
+    const user = await queryUserDetailbyUsername(username);
+    if (!user) {
+      throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
+    }
 
-  const userFile = await queryAllFilebyUserID(user.id);
-  if (!userFile) {
-    throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
+    const userFiles = await queryAllFilebyUserID(user.id);
+    return userFiles;
+  } catch (error) {
+    console.error("Error in listFile:", error);
+    if (error instanceof CustomError) {
+      throw error;
+    }
+    throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to list files");
   }
-
-  return userFile;
 };
 
 export const retrieveFile = async (fileId: string, username: string) => {
-  const user = await queryUserDetailbyUsername(username);
-  if (!user) {
-    throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
+  try {
+    const user = await queryUserDetailbyUsername(username);
+    if (!user) {
+      throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
+    }
+
+    const userFile = await queryFileDetailbyID(fileId, user.id);
+    if (!userFile) {
+      throw new CustomError(StatusCodes.NOT_FOUND, "File not found");
+    }
+
+    const buffer = await userFile.arrayBuffer();
+    const decryptedData = decryptData(Buffer.from(buffer), user.password);
+
+    return decryptedData;
+  } catch (error) {
+    console.error("Error in retrieveFile:", error);
+    if (error instanceof CustomError) {
+      throw error;
+    }
+    throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to retrieve file");
   }
-
-  const userFile = await queryFileDetailbyID(fileId, user.id);
-  if (!userFile) {
-    throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid ID");
-  }
-
-  const buffer = Buffer.from(
-    await (
-      userFile.data as { arrayBuffer(): Promise<ArrayBuffer> }
-    ).arrayBuffer(),
-  );
-  const decryptedData = decryptData(buffer, user.password);
-
-  return decryptedData;
 };
 
 export const deleteFile = async (fileId: string, username: string) => {
-  const user = await queryUserDetailbyUsername(username);
-  if (!user) {
-    throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
-  }
+  try {
+    const user = await queryUserDetailbyUsername(username);
+    if (!user) {
+      throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
+    }
 
-  const userFile = await removeFile(fileId, user.id);
-  if (!userFile) {
-    throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid ID");
+    const result = await removeFile(fileId, user.id);
+    return result;
+  } catch (error) {
+    console.error("Error in deleteFile:", error);
+    if (error instanceof CustomError) {
+      throw error;
+    }
+    throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to delete file");
   }
-
-  return userFile;
 };
