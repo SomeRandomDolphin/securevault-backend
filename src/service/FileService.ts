@@ -36,7 +36,7 @@ export const uploadFile = async (data: FileRequest, username: string) => {
     if (error instanceof CustomError) {
       throw error;
     }
-    throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, "File upload failed");
+    throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, error);
   }
 };
 
