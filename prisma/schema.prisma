@@ -16,5 +16,49 @@ model User {
   updatedAt                 DateTime?             @updatedAt @map("updated_at")
   deletedAt                 DateTime?             @map("deleted_at")
 
+  // references (prisma level only)
+  userToFile                File[]                @relation("ReferUserToFile")
+
   @@map("Users")
+}
+
+model File {
+  id                        Int                   @id @default(autoincrement())
+  userId                    Int                   @unique @map("user_id")
+  filename                  String
+  mimetype                  String
+  path                      String
+  encryptionMethod          Encryption            @map("encryption_method")
+  createdAt                 DateTime              @default(now()) @map("created_at")
+  updatedAt                 DateTime?             @updatedAt @map("updated_at")
+  deletedAt                 DateTime?             @map("deleted_at")
+  
+  // references (prisma level only)
+  fileToFileKey             FileKey?              @relation("ReferFileToFileKey")
+
+  // relational fields
+  fileFromUser              User                  @relation("ReferUserToFile", fields: [userId], references: [id])
+
+  @@map("Files")
+}
+
+model FileKey {
+  id                        Int                   @id @default(autoincrement())
+  fileId                    Int                   @unique @map("file_id")
+  encryptedKey              String                @map("encrypted_key")
+  iv                        String
+  createdAt                 DateTime              @default(now()) @map("created_at")
+  updatedAt                 DateTime?             @updatedAt @map("updated_at")
+  deletedAt                 DateTime?             @map("deleted_at")
+
+  // relational fields
+  fileKeyFromFile           File                  @relation("ReferFileToFileKey", fields: [fileId], references: [id])
+
+  @@map("FileKeys")
+}
+
+enum Encryption {
+  AES
+  RC4
+  DES
 }

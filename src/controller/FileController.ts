@@ -3,12 +3,14 @@ import { StatusCodes } from "http-status-codes";
 import { responseData, responseError } from "../Utils/API-Response";
 import { UserToken } from "../middleware/AuthMiddleware";
 import * as FileService from "../service/FileService";
+import type { EncryptionMethod } from "../Utils/Encryption";
 
 export const uploadFile = async (req: Request, res: Response) => {
   try {
     const username = (req as UserToken).user.username;
+    const encryptionMethod = req.body.encryptionMethod as EncryptionMethod;
     const value = req.file;
-    const userFile = await FileService.uploadFile(value, username);
+    const userFile = await FileService.uploadFile(value, username, encryptionMethod);
 
     responseData(res, StatusCodes.OK, "File Uploaded Successfully", userFile);
   } catch (err) {
