@@ -23,7 +23,7 @@ export const createFile = async (
     if (storageResponse.error) {
       throw new CustomError(
         StatusCodes.BAD_REQUEST,
-        `Storage error: ${storageResponse.error.message}`
+        `Storage error: ${storageResponse.error.message}`,
       );
     }
 
@@ -33,7 +33,7 @@ export const createFile = async (
         mimetype: mimetype,
         path: uploadPath,
         encryptionMethod: encryptionMethod,
-        userId: userId
+        userId: userId,
       },
     });
 
@@ -42,7 +42,7 @@ export const createFile = async (
     if (error instanceof CustomError) throw error;
     throw new CustomError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      `Failed to create file: ${error.message}`
+      `Failed to create file: ${error.message}`,
     );
   }
 };
@@ -57,14 +57,14 @@ export const createFileKey = async (
       data: {
         encryptedKey: encryptedKey,
         iv: iv,
-        fileId: fileId
+        fileId: fileId,
       },
     });
     return fileKey;
   } catch (error) {
     throw new CustomError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      `Failed to store file key: ${error.message}`
+      `Failed to store file key: ${error.message}`,
     );
   }
 };
@@ -97,13 +97,13 @@ export const queryAllFilebyUserID = async (userId: number) => {
     if (storageResponse.error) {
       throw new CustomError(
         StatusCodes.BAD_REQUEST,
-        `Storage error: ${storageResponse.error.message}`
+        `Storage error: ${storageResponse.error.message}`,
       );
     }
 
-    const combinedData = files.map(file => {
+    const combinedData = files.map((file) => {
       const storageFile = storageResponse.data.find(
-        sf => sf.name === file.filename
+        (sf) => sf.name === file.filename,
       );
       return {
         ...file,
@@ -117,7 +117,7 @@ export const queryAllFilebyUserID = async (userId: number) => {
     if (error instanceof CustomError) throw error;
     throw new CustomError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      `Failed to query files: ${error.message}`
+      `Failed to query files: ${error.message}`,
     );
   }
 };
@@ -143,7 +143,7 @@ export const queryFilebyID = async (fileId: string, userId: number) => {
     if (storageResponse.error) {
       throw new CustomError(
         StatusCodes.BAD_REQUEST,
-        `Storage error: ${storageResponse.error.message}`
+        `Storage error: ${storageResponse.error.message}`,
       );
     }
 
@@ -152,7 +152,7 @@ export const queryFilebyID = async (fileId: string, userId: number) => {
     if (error instanceof CustomError) throw error;
     throw new CustomError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      `Failed to retrieve file: ${error.message}`
+      `Failed to retrieve file: ${error.message}`,
     );
   }
 };
@@ -174,7 +174,7 @@ export const queryFileDetailbyID = async (fileId: number) => {
     if (error instanceof CustomError) throw error;
     throw new CustomError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      `Failed to retrieve file key: ${error.message}`
+      `Failed to retrieve file key: ${error.message}`,
     );
   }
 };
@@ -196,7 +196,7 @@ export const queryFileKeybyFileID = async (fileId: number) => {
     if (error instanceof CustomError) throw error;
     throw new CustomError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      `Failed to retrieve file key: ${error.message}`
+      `Failed to retrieve file key: ${error.message}`,
     );
   }
 };
@@ -222,7 +222,7 @@ export const removeFile = async (fileId: string, userId: number) => {
     if (storageResponse.error) {
       throw new CustomError(
         StatusCodes.BAD_REQUEST,
-        `Storage error: ${storageResponse.error.message}`
+        `Storage error: ${storageResponse.error.message}`,
       );
     }
 
@@ -242,7 +242,7 @@ export const removeFile = async (fileId: string, userId: number) => {
     if (error instanceof CustomError) throw error;
     throw new CustomError(
       StatusCodes.INTERNAL_SERVER_ERROR,
-      `Failed to delete file: ${error.message}`
+      `Failed to delete file: ${error.message}`,
     );
   }
 };

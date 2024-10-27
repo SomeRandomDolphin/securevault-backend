@@ -10,7 +10,11 @@ export const uploadFile = async (req: Request, res: Response) => {
     const username = (req as UserToken).user.username;
     const encryptionMethod = req.body.encryptionMethod as EncryptionMethod;
     const value = req.file;
-    const userFile = await FileService.uploadFile(value, username, encryptionMethod);
+    const userFile = await FileService.uploadFile(
+      value,
+      username,
+      encryptionMethod,
+    );
 
     responseData(res, StatusCodes.OK, "File Uploaded Successfully", userFile);
   } catch (err) {

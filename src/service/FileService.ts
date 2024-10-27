@@ -17,9 +17,9 @@ import type { EncryptionMethod } from "../Utils/Encryption";
 import crypto from "crypto";
 
 export const uploadFile = async (
-  data: FileRequest, 
-  username: string, 
-  encryptionMethod: EncryptionMethod
+  data: FileRequest,
+  username: string,
+  encryptionMethod: EncryptionMethod,
 ) => {
   if (!encryptionMethod || !supportedAlgorithms.includes(encryptionMethod)) {
     throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid Encryption Method");
@@ -36,14 +36,18 @@ export const uploadFile = async (
 
   const fileKey = crypto.randomBytes(32);
   const iv = crypto.randomBytes(16);
-  const encryptedData = encryptData(data.buffer, fileKey.toString('hex'), encryptionMethod);
+  const encryptedData = encryptData(
+    data.buffer,
+    fileKey.toString("hex"),
+    encryptionMethod,
+  );
   const fileName = Date.now() + "-" + data.originalname;
   const userFile = await createFile(
     fileName,
     data.mimetype,
     encryptedData,
     user.id,
-    encryptionMethod
+    encryptionMethod,
   );
 
   if (!userFile) {
@@ -52,15 +56,22 @@ export const uploadFile = async (
 
   const masterKey = process.env.MASTER_KEY;
   if (!masterKey) {
-    throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, "Master Key Not Configured");
+    throw new CustomError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      "Master Key Not Configured",
+    );
   }
 
-  const cipher = crypto.createCipheriv('aes-256-cbc', Buffer.from(masterKey, 'hex'), iv);
+  const cipher = crypto.createCipheriv(
+    "aes-256-cbc",
+    Buffer.from(masterKey, "hex"),
+    iv,
+  );
   const encryptedKey = Buffer.concat([
     cipher.update(fileKey),
-    cipher.final()
-  ]).toString('hex');
-  await createFileKey(userFile.id, encryptedKey, iv.toString('hex'));
+    cipher.final(),
+  ]).toString("hex");
+  await createFileKey(userFile.id, encryptedKey, iv.toString("hex"));
 
   return userFile;
 };
@@ -79,10 +90,7 @@ export const listFile = async (username: string) => {
   return userFile;
 };
 
-export const retrieveFile = async (
-  fileId: string, 
-  username: string,
-) => {
+export const retrieveFile = async (fileId: string, username: string) => {
   const user = await queryUserDetailbyUsername(username);
   if (!user) {
     throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
@@ -105,23 +113,30 @@ export const retrieveFile = async (
 
   const masterKey = process.env.MASTER_KEY;
   if (!masterKey) {
-    throw new CustomError(StatusCodes.INTERNAL_SERVER_ERROR, "Master key not configured");
+    throw new CustomError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      "Master key not configured",
+    );
   }
 
   const decipher = crypto.createDecipheriv(
-    'aes-256-cbc',
-    Buffer.from(masterKey, 'hex'),
-    Buffer.from(fileKey.iv, 'hex')
+    "aes-256-cbc",
+    Buffer.from(masterKey, "hex"),
+    Buffer.from(fileKey.iv, "hex"),
   );
-  
+
   const decryptedKey = Buffer.concat([
-    decipher.update(Buffer.from(fileKey.encryptedKey, 'hex')),
-    decipher.final()
-  ]).toString('hex');
+    decipher.update(Buffer.from(fileKey.encryptedKey, "hex")),
+    decipher.final(),
+  ]).toString("hex");
 
   const arrayBuffer = await blob.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  const decryptedData = decryptData(buffer, decryptedKey, file.encryptionMethod);
+  const decryptedData = decryptData(
+    buffer,
+    decryptedKey,
+    file.encryptionMethod,
+  );
 
   return decryptedData;
 };
