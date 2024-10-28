@@ -1,34 +1,45 @@
 import db from "../config/connectDb";
-import { users } from "./UserSeed";
+import { generateUsers } from "./UserSeed";
 
 async function seedUsers() {
-  users.forEach(async (user) => {
-    await db.user.upsert({
-      where: {
-        id: user.id,
-      },
-      update: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        password: user.password,
-      },
-      create: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        password: user.password,
-      },
-    });
-  });
+  const users = await generateUsers();
+  
+  await Promise.all(
+    users.map(async (user) => {
+      await db.user.upsert({
+        where: {
+          id: user.id,
+        },
+        update: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          password: user.password,
+          publicKey: user.publicKey,
+          privateKey: user.privateKey,
+        },
+        create: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+          password: user.password,
+          publicKey: user.publicKey,
+          privateKey: user.privateKey,
+        },
+      });
+    })
+  );
 }
 
 async function main() {
   try {
-    seedUsers();
+    await seedUsers();
+    console.log("Seeding completed successfully");
   } catch (err) {
-    console.log(err);
+    console.error("Error during seeding:", err);
     process.exit(1);
+  } finally {
+    await db.$disconnect();
   }
 }
 

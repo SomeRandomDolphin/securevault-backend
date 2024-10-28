@@ -11,20 +11,24 @@ model User {
   id                        Int                   @id @default(autoincrement())
   username                  String                @unique 
   email                     String                @unique 
-  password                  String  
+  password                  String
+  publicKey                 String                @map("public_key")
+  privateKey                String                @map("private_key")
   createdAt                 DateTime              @default(now()) @map("created_at")
   updatedAt                 DateTime?             @updatedAt @map("updated_at")
   deletedAt                 DateTime?             @map("deleted_at")
 
   // references (prisma level only)
   userToFile                File[]                @relation("ReferUserToFile")
+  ownerToSharedAccess       SharedAccess[]        @relation("ReferOwnerToSharedAccess")
+  requesterToSharedAccess   SharedAccess[]        @relation("ReferRequesterToSharedAccess")
 
   @@map("Users")
 }
 
 model File {
   id                        Int                   @id @default(autoincrement())
-  userId                    Int                   @unique @map("user_id")
+  userId                    Int                   @map("user_id")
   filename                  String
   mimetype                  String
   path                      String
@@ -35,6 +39,7 @@ model File {
   
   // references (prisma level only)
   fileToFileKey             FileKey?              @relation("ReferFileToFileKey")
+  fileToSharedAccess        SharedAccess[]        @relation("ReferFileToSharedAccess")
 
   // relational fields
   fileFromUser              User                  @relation("ReferUserToFile", fields: [userId], references: [id])
@@ -57,8 +62,36 @@ model FileKey {
   @@map("FileKeys")
 }
 
+model SharedAccess {
+  id                        Int                   @id @default(autoincrement())
+  ownerId                   Int                   @map("owner_id")
+  requesterId               Int                   @map("requester_id")
+  fileId                    Int                   @map("file_id")
+  encryptedKey              String                @map("encrypted_key")
+  publicKeyUsed             String                @map("public_key_used")
+  status                    ShareStatus           @default(PENDING)
+  createdAt                 DateTime              @default(now()) @map("created_at")
+  updatedAt                 DateTime?             @updatedAt @map("updated_at")
+  deletedAt                 DateTime?             @map("deleted_at")
+  expiresAt                 DateTime              @map("expires_at")
+
+  // relational fields
+  sharedAccessFromOwner     User                  @relation("ReferOwnerToSharedAccess", fields: [ownerId], references: [id])
+  sharedAccessFromRequester User                  @relation("ReferRequesterToSharedAccess", fields: [requesterId], references: [id])
+  sharedAccessFromFile      File                  @relation("ReferFileToSharedAccess", fields: [fileId], references: [id])
+
+  @@map("SharedAccess")
+}
+
 enum Encryption {
   AES
   RC4
   DES
+}
+
+enum ShareStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REVOKED
 }
