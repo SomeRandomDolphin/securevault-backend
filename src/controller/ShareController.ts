@@ -58,8 +58,8 @@ export const approveAccess = async (req: Request, res: Response) => {
 
 export const listSharedFiles = async (req: Request, res: Response) => {
   try {
-    const userId = (req as UserToken).user.id;
-    const sharedFiles = await ShareService.listSharedFiles(userId);
+    const username = (req as UserToken).user.username;
+    const sharedFiles = await ShareService.listSharedFiles(username);
 
     responseData(
       res,
@@ -77,10 +77,12 @@ export const retrieveSharedFile = async (req: Request, res: Response) => {
     const username = (req as UserToken).user.username;
     const fileId = parseInt(req.params.file_id);
     const password = req.body.password;
+    const encryptedKey = req.body.encryptedKey;
     const file = await ShareService.retrieveSharedFile(
       fileId,
       username,
       password,
+      encryptedKey,
     );
 
     res.setHeader(
