@@ -18,7 +18,6 @@ import {
   getShareRequestWithFile,
   updateShareRequest,
   getApprovedShares,
-  getShareAccessWithFile,
   downloadSharedFile,
   getPendingShareRequests,
 } from "../repository/ShareRepository";
@@ -143,10 +142,14 @@ export const approveFileAccess = async (shareId: number) => {
   }
 };
 
-export const listSharedFiles = async (userId: number) => {
+export const listSharedFiles = async (username: string) => {
   try {
-    const sharedFiles = await getApprovedShares(userId);
-
+    const user = await queryUserDetailbyUsername(username);
+    if (!user) {
+      throw new CustomError(StatusCodes.NOT_FOUND, "Invalid Username");
+    }
+    
+    const sharedFiles = await getApprovedShares(user.id);
     const filesWithSize = await Promise.all(
       sharedFiles.map(async (share) => {
         const file = await queryFileDetailbyID(share.fileId);
@@ -176,19 +179,12 @@ export const retrieveSharedFile = async (
   fileId: number,
   username: string,
   userPassword: string,
+  userEncryptedKey: string,
 ) => {
   try {
     const requester = await queryUserDetailbyUsername(username);
     if (!requester) {
       throw new CustomError(StatusCodes.NOT_FOUND, "Requester not found");
-    }
-
-    const shareAccess = await getShareAccessWithFile(fileId, requester.id);
-    if (!shareAccess) {
-      throw new CustomError(
-        StatusCodes.FORBIDDEN,
-        "No valid share access found",
-      );
     }
 
     const file = await queryFileDetailbyID(fileId);
@@ -199,7 +195,7 @@ export const retrieveSharedFile = async (
     );
 
     try {
-      const encryptedKey = Buffer.from(shareAccess.encryptedKey, "base64");
+      const encryptedKey = Buffer.from(userEncryptedKey, "base64");
       const fileKeyBuffer = crypto.privateDecrypt(
         {
           key: privateKey,
