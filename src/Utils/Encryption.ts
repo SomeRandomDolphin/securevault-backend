@@ -21,11 +21,14 @@ const algorithms = {
 export type EncryptionMethod = keyof typeof algorithms;
 
 function deriveKey(key: string, salt: string, keyLength: number): Buffer {
-  return crypto.scryptSync(key, salt, keyLength, {
-    N: 16384, // Cost factor
-    r: 8, // Block size
-    p: 1, // Parallelization
+  const derivedKey = crypto.scryptSync(key, salt, Math.max(keyLength, 8), {
+    N: 16384,
+    r: 8,
+    p: 1,
   });
+  const finalKey = derivedKey.slice(0, keyLength);
+  
+  return finalKey;
 }
 
 export const encryptData = (
@@ -41,9 +44,7 @@ export const encryptData = (
 
     const salt = crypto.randomBytes(16);
     const key = deriveKey(encryptionKey, salt.toString("hex"), algo.keyLength);
-
-    const iv =
-      algo.ivLength > 0 ? crypto.randomBytes(algo.ivLength) : Buffer.alloc(0);
+    const iv = algo.ivLength > 0 ? crypto.randomBytes(algo.ivLength) : Buffer.alloc(0);
 
     const cipher = crypto.createCipheriv(
       algo.cipherName,
@@ -51,9 +52,14 @@ export const encryptData = (
       algo.ivLength > 0 ? iv : "",
     );
 
-    const encrypted = Buffer.concat([cipher.update(data), cipher.final()]);
+    const encryptedParts = [cipher.update(data)];
+    const finalPart = cipher.final();
+    encryptedParts.push(finalPart);
 
-    return Buffer.concat([salt, iv, encrypted]);
+    const encrypted = Buffer.concat(encryptedParts);
+    const result = Buffer.concat([salt, iv, encrypted]);
+    
+    return result;
   } catch (error) {
     console.error("Encryption error:", error);
     throw new Error(`Encryption failed: ${error.message}`);
@@ -62,7 +68,7 @@ export const encryptData = (
 
 export const decryptData = (
   encryptedData: Buffer,
-  encryptionKey: string,
+  encryptionKey: string | Buffer,
   method: EncryptionMethod,
 ): Buffer => {
   try {
@@ -82,21 +88,35 @@ export const decryptData = (
     const iv = encryptedData.slice(saltLength, saltLength + ivLength);
     const data = encryptedData.slice(saltLength + ivLength);
 
-    const key = deriveKey(encryptionKey, salt.toString("hex"), algo.keyLength);
+    let finalKey: Buffer;
+    if (Buffer.isBuffer(encryptionKey)) {
+      finalKey = encryptionKey;
+    } else {
+      finalKey = deriveKey(encryptionKey, salt.toString("hex"), algo.keyLength);
+    }
 
     const decipher = crypto.createDecipheriv(
       algo.cipherName,
-      key,
+      finalKey,
       algo.ivLength > 0 ? iv : "",
     );
 
-    return Buffer.concat([decipher.update(data), decipher.final()]);
+    try {
+      const decryptedParts = [decipher.update(data)];
+      const finalPart = decipher.final();
+      decryptedParts.push(finalPart);
+      
+      const decrypted = Buffer.concat(decryptedParts);
+      
+      return decrypted;
+    } catch (error) {
+      console.error("Dechipher error:", error);
+      throw error;
+    }
   } catch (error) {
     console.error("Decryption error:", error);
     throw new Error(`Decryption failed: ${error.message}`);
   }
 };
 
-export const supportedAlgorithms = Object.keys(
-  algorithms,
-) as EncryptionMethod[];
+export const supportedAlgorithms = Object.keys(algorithms) as EncryptionMethod[];

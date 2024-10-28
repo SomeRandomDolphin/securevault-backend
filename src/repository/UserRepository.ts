@@ -80,6 +80,19 @@ export const queryUserDetailbyUsername = async (usernameInput: string) => {
   return data;
 };
 
+export const queryUserPrivateKeybyUsername = async (usernameInput: string) => {
+  const data = await db.user.findFirst({
+    where: {
+      username: usernameInput,
+    },
+    select: {
+      privateKey: true,
+    },
+  });
+
+  return data;
+};
+
 export const queryUserDetailbyEmail = async (emailInput: string) => {
   const data = await db.user.findFirst({
     where: {
