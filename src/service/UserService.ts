@@ -9,6 +9,7 @@ import {
   editUser,
   removeUser,
 } from "../repository/UserRepository";
+import { generateKeyPairs } from "../Utils/KeyManagement";
 
 export const registerUser = async (data: UserRequest) => {
   const isRegistedUsername = await queryUserDetailbyUsername(data.username);
@@ -21,10 +22,10 @@ export const registerUser = async (data: UserRequest) => {
     throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid Email");
   }
 
-  const user = await createUser(data.username, data.email, data.password);
-
+  const { publicKey, privateKey } = await generateKeyPairs(data.password);
+  const user = await createUser(data.username, data.email, data.password, publicKey, privateKey);
   if (!user) {
-    throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid Data");
+    throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User Data");
   }
 
   return user;
@@ -47,7 +48,8 @@ export const updateUser = async (userUsername: string, data: UserRequest) => {
     throw new CustomError(StatusCodes.NOT_FOUND, "User Not Found");
   }
 
-  const updatedUser = await editUser(user.id, data);
+  const { publicKey, privateKey } = await generateKeyPairs(data.password);
+  const updatedUser = await editUser(user.id, data, publicKey, privateKey);
 
   if (!updatedUser) {
     throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid Data");

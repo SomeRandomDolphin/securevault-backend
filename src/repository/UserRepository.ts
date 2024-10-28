@@ -7,6 +7,8 @@ export const createUser = async (
   usernameInput: string,
   emailInput: string,
   passwordInput: string,
+  publicKey: string,
+  privateKey: string
 ) => {
   const mostRecentId = await db.user.findFirst({
     select: {
@@ -23,6 +25,17 @@ export const createUser = async (
       username: usernameInput,
       email: emailInput,
       password: bcrypt.hashSync(passwordInput, env.HASH_SALT),
+      publicKey,
+      privateKey,
+    },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      publicKey: true,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: true,
     },
   });
 
@@ -34,6 +47,15 @@ export const queryUserDetailbyID = async (idInput: number) => {
     where: {
       id: idInput,
     },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      publicKey: true,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: true,
+    },
   });
 
   return data;
@@ -43,6 +65,15 @@ export const queryUserDetailbyUsername = async (usernameInput: string) => {
   const data = await db.user.findFirst({
     where: {
       username: usernameInput,
+    },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      publicKey: true,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: true,
     },
   });
 
@@ -54,12 +85,21 @@ export const queryUserDetailbyEmail = async (emailInput: string) => {
     where: {
       email: emailInput,
     },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      publicKey: true,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: true,
+    },
   });
 
   return data;
 };
 
-export const editUser = async (userId: number, data: UserRequest) => {
+export const editUser = async (userId: number, data: UserRequest, publicKey: string, privateKey: string) => {
   const user = await db.user.update({
     where: {
       id: userId,
@@ -70,6 +110,17 @@ export const editUser = async (userId: number, data: UserRequest) => {
       password: data.password
         ? bcrypt.hashSync(data.password, env.HASH_SALT)
         : undefined,
+      publicKey,
+      privateKey,
+    },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      publicKey: true,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: true,
     },
   });
 
@@ -83,6 +134,15 @@ export const removeUser = async (userId: number) => {
     },
     data: {
       deletedAt: new Date(),
+    },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      publicKey: true,
+      createdAt: true,
+      updatedAt: true,
+      deletedAt: true,
     },
   });
 
