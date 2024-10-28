@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import env from "../config/LoacEnv";
 
 enum TokenExpiredDuration {
-  ACCESS_TOKEN_DURATION = "30m",
+  ACCESS_TOKEN_DURATION = "60m",
 }
 
 export const generateAccessToken = (payload: object) => {
