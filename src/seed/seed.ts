@@ -3,7 +3,7 @@ import { generateUsers } from "./UserSeed";
 
 async function seedUsers() {
   const users = await generateUsers();
-  
+
   await Promise.all(
     users.map(async (user) => {
       await db.user.upsert({
@@ -27,7 +27,7 @@ async function seedUsers() {
           privateKey: user.privateKey,
         },
       });
-    })
+    }),
   );
 }
 

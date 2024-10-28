@@ -31,9 +31,9 @@ export const generateUsers = async () => {
         ...user,
         password: bcrypt.hashSync(user.password, env.HASH_SALT),
         publicKey,
-        privateKey
+        privateKey,
       };
-    })
+    }),
   );
 
   return users;

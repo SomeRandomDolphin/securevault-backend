@@ -27,7 +27,7 @@ function deriveKey(key: string, salt: string, keyLength: number): Buffer {
     p: 1,
   });
   const finalKey = derivedKey.slice(0, keyLength);
-  
+
   return finalKey;
 }
 
@@ -44,7 +44,8 @@ export const encryptData = (
 
     const salt = crypto.randomBytes(16);
     const key = deriveKey(encryptionKey, salt.toString("hex"), algo.keyLength);
-    const iv = algo.ivLength > 0 ? crypto.randomBytes(algo.ivLength) : Buffer.alloc(0);
+    const iv =
+      algo.ivLength > 0 ? crypto.randomBytes(algo.ivLength) : Buffer.alloc(0);
 
     const cipher = crypto.createCipheriv(
       algo.cipherName,
@@ -58,7 +59,7 @@ export const encryptData = (
 
     const encrypted = Buffer.concat(encryptedParts);
     const result = Buffer.concat([salt, iv, encrypted]);
-    
+
     return result;
   } catch (error) {
     console.error("Encryption error:", error);
@@ -105,9 +106,9 @@ export const decryptData = (
       const decryptedParts = [decipher.update(data)];
       const finalPart = decipher.final();
       decryptedParts.push(finalPart);
-      
+
       const decrypted = Buffer.concat(decryptedParts);
-      
+
       return decrypted;
     } catch (error) {
       console.error("Dechipher error:", error);
@@ -119,4 +120,6 @@ export const decryptData = (
   }
 };
 
-export const supportedAlgorithms = Object.keys(algorithms) as EncryptionMethod[];
+export const supportedAlgorithms = Object.keys(
+  algorithms,
+) as EncryptionMethod[];

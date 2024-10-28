@@ -23,7 +23,13 @@ export const registerUser = async (data: UserRequest) => {
   }
 
   const { publicKey, privateKey } = await generateKeyPairs(data.password);
-  const user = await createUser(data.username, data.email, data.password, publicKey, privateKey);
+  const user = await createUser(
+    data.username,
+    data.email,
+    data.password,
+    publicKey,
+    privateKey,
+  );
   if (!user) {
     throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User Data");
   }

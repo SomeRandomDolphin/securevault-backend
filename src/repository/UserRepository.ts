@@ -8,7 +8,7 @@ export const createUser = async (
   emailInput: string,
   passwordInput: string,
   publicKey: string,
-  privateKey: string
+  privateKey: string,
 ) => {
   const mostRecentId = await db.user.findFirst({
     select: {
@@ -112,7 +112,12 @@ export const queryUserDetailbyEmail = async (emailInput: string) => {
   return data;
 };
 
-export const editUser = async (userId: number, data: UserRequest, publicKey: string, privateKey: string) => {
+export const editUser = async (
+  userId: number,
+  data: UserRequest,
+  publicKey: string,
+  privateKey: string,
+) => {
   const user = await db.user.update({
     where: {
       id: userId,
