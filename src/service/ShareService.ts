@@ -16,10 +16,11 @@ import {
   createShareRequest,
   findPendingShareRequest,
   getShareRequestWithFile,
-  updateShareRequest,
   getApprovedShares,
   downloadSharedFile,
   getPendingShareRequests,
+  rejectShareRequest,
+  approveShareRequest,
 } from "../repository/ShareRepository";
 
 export const requestFileAccess = async (
@@ -128,7 +129,7 @@ export const approveFileAccess = async (shareId: number) => {
       decryptedFileKey,
     );
 
-    return await updateShareRequest(
+    return await approveShareRequest(
       shareId,
       encryptedKeyForRequester.toString("base64"),
       requester.publicKey,
@@ -140,6 +141,15 @@ export const approveFileAccess = async (shareId: number) => {
       `Failed to encrypt sharing key: ${error.message}`,
     );
   }
+};
+
+export const rejectFileAccess = async (shareId: number) => {
+  const shareRequest = await getShareRequestWithFile(shareId);
+  if (!shareRequest || shareRequest.status !== "PENDING") {
+    throw new CustomError(StatusCodes.NOT_FOUND, "Invalid share request");
+  }
+  
+  return await rejectShareRequest(shareId);
 };
 
 export const listSharedFiles = async (username: string) => {

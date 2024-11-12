@@ -56,6 +56,22 @@ export const approveAccess = async (req: Request, res: Response) => {
   }
 };
 
+export const rejectAccess = async (req: Request, res: Response) => {
+  try {
+    const shareId = parseInt(req.params.share_id);
+    const shareApproval = await ShareService.rejectFileAccess(shareId);
+
+    responseData(
+      res,
+      StatusCodes.OK,
+      "Access rejected successfully",
+      shareApproval,
+    );
+  } catch (err) {
+    responseError(res, err);
+  }
+};
+
 export const listSharedFiles = async (req: Request, res: Response) => {
   try {
     const username = (req as UserToken).user.username;

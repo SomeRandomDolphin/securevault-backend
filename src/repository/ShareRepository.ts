@@ -95,7 +95,7 @@ export const getShareRequestWithFile = async (shareId: number) => {
   }
 };
 
-export const updateShareRequest = async (
+export const approveShareRequest = async (
   shareId: number,
   encryptedKey: string,
   publicKeyUsed: string,
@@ -104,9 +104,27 @@ export const updateShareRequest = async (
     return await prisma.sharedAccess.update({
       where: { id: shareId },
       data: {
-        status: "APPROVED",
+        status: ShareStatus.APPROVED,
         encryptedKey,
         publicKeyUsed,
+      },
+    });
+  } catch (error) {
+    throw new CustomError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      `Failed to update share request: ${error.message}`,
+    );
+  }
+};
+
+export const rejectShareRequest = async (
+  shareId: number,
+) => {
+  try {
+    return await prisma.sharedAccess.update({
+      where: { id: shareId },
+      data: {
+        status: ShareStatus.REJECTED,
       },
     });
   } catch (error) {
