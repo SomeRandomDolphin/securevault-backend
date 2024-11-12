@@ -37,7 +37,7 @@ export const getPendingShareRequests = async (ownerId: number) => {
     return await prisma.sharedAccess.findMany({
       where: {
         ownerId,
-        status: "PENDING",
+        status: ShareStatus.PENDING,
       },
       include: {
         sharedAccessFromRequester: {
@@ -71,7 +71,7 @@ export const findPendingShareRequest = async (
       where: {
         fileId,
         requesterId,
-        status: "PENDING",
+        status: ShareStatus.PENDING,
       },
     });
   } catch (error) {
@@ -140,10 +140,7 @@ export const getApprovedShares = async (userId: number) => {
     return await prisma.sharedAccess.findMany({
       where: {
         requesterId: userId,
-        status: "APPROVED",
-        expiresAt: {
-          gt: new Date(),
-        },
+        status: ShareStatus.APPROVED,
       },
     });
   } catch (error) {
@@ -190,10 +187,7 @@ export const getShareAccessWithFile = async (
       where: {
         fileId,
         requesterId,
-        status: "APPROVED",
-        expiresAt: {
-          gt: new Date(),
-        },
+        status: ShareStatus.APPROVED,
       },
     });
   } catch (error) {
