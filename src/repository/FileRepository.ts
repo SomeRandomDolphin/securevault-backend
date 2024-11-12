@@ -122,6 +122,32 @@ export const queryAllFilebyUserID = async (userId: number) => {
   }
 };
 
+export const queryAllFile = async () => {
+  try {
+    const files = await prisma.file.findMany({
+      where: {
+        deletedAt: null,
+      },
+      include: {
+        fileFromUser: {
+          select: {
+            username: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return files;
+  } catch (error) {
+    if (error instanceof CustomError) throw error;
+    throw new CustomError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      `Failed to query files: ${error.message}`,
+    );
+  }
+};
+
 export const queryFilebyID = async (fileId: string, userId: number) => {
   try {
     const file = await prisma.file.findFirst({

@@ -5,6 +5,7 @@ import {
   retrieveFile,
   deleteFile,
   listFile,
+  listAllFile,
 } from "../controller/FileController";
 import { userAuthMiddleware } from "../middleware/AuthMiddleware";
 
@@ -19,6 +20,7 @@ fileRouter.post(
   uploadFile,
 );
 fileRouter.get("/me", userAuthMiddleware, listFile);
+fileRouter.get("/all", userAuthMiddleware, listAllFile);
 fileRouter.get("/:file_id", userAuthMiddleware, retrieveFile);
 fileRouter.delete("/:file_id", userAuthMiddleware, deleteFile);
 

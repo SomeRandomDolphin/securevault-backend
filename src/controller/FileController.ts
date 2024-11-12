@@ -38,6 +38,21 @@ export const listFile = async (req: Request, res: Response) => {
   }
 };
 
+export const listAllFile = async (req: Request, res: Response) => {
+  try {
+    const userFile = await FileService.listAllFile();
+
+    responseData(
+      res,
+      StatusCodes.OK,
+      "All File List Retrieved Successfully",
+      userFile,
+    );
+  } catch (err) {
+    responseError(res, err);
+  }
+};
+
 export const retrieveFile = async (req: Request, res: Response) => {
   try {
     const username = (req as UserToken).user.username;

@@ -6,6 +6,7 @@ import { queryUserDetailbyUsername } from "../repository/UserRepository";
 import {
   createFile,
   createFileKey,
+  queryAllFile,
   queryAllFilebyUserID,
   queryFilebyID,
   queryFileDetailbyID,
@@ -87,6 +88,11 @@ export const listFile = async (username: string) => {
     throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
   }
 
+  return userFile;
+};
+
+export const listAllFile = async () => {
+  const userFile = await queryAllFile();
   return userFile;
 };
 
