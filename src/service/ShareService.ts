@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { CustomError } from "../Utils/ErrorHandling";
 import { StatusCodes } from "http-status-codes";
 import { decryptData } from "../Utils/Encryption";
+import { PDFSigner } from "../Utils/PDFSigner";
 import {
   queryUserDetailbyID,
   queryUserDetailbyUsername,
@@ -198,6 +199,11 @@ export const retrieveSharedFile = async (
     }
 
     const file = await queryFileDetailbyID(fileId);
+    const owner = await queryUserDetailbyID(file.userId);
+    if (!owner) {
+      throw new CustomError(StatusCodes.NOT_FOUND, "File owner not found");
+    }
+
     const userPrivateKey = await queryUserPrivateKeybyUsername(username);
     const privateKey = decryptPrivateKey(
       userPrivateKey.privateKey,
@@ -223,6 +229,28 @@ export const retrieveSharedFile = async (
         fileKeyBuffer.toString("hex"),
         file.encryptionMethod,
       );
+
+      if (file.mimetype === "application/pdf") {
+        try {
+          const isValid = await PDFSigner.verifySignature(
+            decryptedData,
+            owner.publicKey
+          );
+
+          if (!isValid) {
+            throw new CustomError(
+              StatusCodes.BAD_REQUEST,
+              "PDF signature verification failed"
+            );
+          }
+        } catch (error) {
+          if (error instanceof CustomError) throw error;
+          throw new CustomError(
+            StatusCodes.INTERNAL_SERVER_ERROR,
+            `Failed to verify PDF signature: ${error.message}`
+          );
+        }
+      }
 
       return {
         data: decryptedData,
