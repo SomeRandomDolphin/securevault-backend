@@ -2,7 +2,10 @@ import { StatusCodes } from "http-status-codes";
 import { CustomError } from "../Utils/ErrorHandling";
 import { FileRequest } from "../model/FileModel";
 import { encryptData, decryptData } from "../Utils/Encryption";
-import { queryUserDetailbyUsername, queryUserPrivateKeybyUsername } from "../repository/UserRepository";
+import {
+  queryUserDetailbyUsername,
+  queryUserPrivateKeybyUsername,
+} from "../repository/UserRepository";
 import { PDFSigner } from "../Utils/PDFSigner";
 import {
   createFile,
@@ -22,7 +25,7 @@ export const uploadFile = async (
   data: FileRequest,
   username: string,
   encryptionMethod: EncryptionMethod,
-  password: string
+  password: string,
 ) => {
   if (!encryptionMethod || !supportedAlgorithms.includes(encryptionMethod)) {
     throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid Encryption Method");
@@ -47,7 +50,7 @@ export const uploadFile = async (
     if (!password) {
       throw new CustomError(
         StatusCodes.BAD_REQUEST,
-        "Password required for PDF signing"
+        "Password required for PDF signing",
       );
     }
 
@@ -55,13 +58,13 @@ export const uploadFile = async (
       processedBuffer = await PDFSigner.signPDF(
         data.buffer,
         userPrivateKey.privateKey,
-        password
+        password,
       );
     } catch (error) {
       console.log(error);
       throw new CustomError(
         StatusCodes.INTERNAL_SERVER_ERROR,
-        `Failed to sign PDF: ${error.message}`
+        `Failed to sign PDF: ${error.message}`,
       );
     }
   }
@@ -184,20 +187,20 @@ export const retrieveFile = async (fileId: string, username: string) => {
 
       const isValid = await PDFSigner.verifySignature(
         decryptedData,
-        owner.publicKey
+        owner.publicKey,
       );
 
       if (!isValid) {
         throw new CustomError(
           StatusCodes.BAD_REQUEST,
-          "PDF signature verification failed"
+          "PDF signature verification failed",
         );
       }
     } catch (error) {
       if (error instanceof CustomError) throw error;
       throw new CustomError(
         StatusCodes.INTERNAL_SERVER_ERROR,
-        `Failed to verify PDF signature: ${error.message}`
+        `Failed to verify PDF signature: ${error.message}`,
       );
     }
   }

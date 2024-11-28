@@ -117,9 +117,7 @@ export const approveShareRequest = async (
   }
 };
 
-export const rejectShareRequest = async (
-  shareId: number,
-) => {
+export const rejectShareRequest = async (shareId: number) => {
   try {
     return await prisma.sharedAccess.update({
       where: { id: shareId },

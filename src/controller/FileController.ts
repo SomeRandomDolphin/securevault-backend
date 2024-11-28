@@ -62,7 +62,10 @@ export const retrieveFile = async (req: Request, res: Response) => {
     const userFile = await FileService.retrieveFile(fileId, username);
 
     res.setHeader("Content-Type", userFile.mimetype);
-    res.setHeader("Content-Disposition", `attachment; filename="${userFile.filename}"`);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${userFile.filename}"`,
+    );
     res.send(userFile.data);
   } catch (err) {
     responseError(res, err);

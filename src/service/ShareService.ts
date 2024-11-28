@@ -149,7 +149,7 @@ export const rejectFileAccess = async (shareId: number) => {
   if (!shareRequest || shareRequest.status !== "PENDING") {
     throw new CustomError(StatusCodes.NOT_FOUND, "Invalid share request");
   }
-  
+
   return await rejectShareRequest(shareId);
 };
 
@@ -159,7 +159,7 @@ export const listSharedFiles = async (username: string) => {
     if (!user) {
       throw new CustomError(StatusCodes.NOT_FOUND, "Invalid Username");
     }
-    
+
     const sharedFiles = await getApprovedShares(user.id);
     const filesWithSize = await Promise.all(
       sharedFiles.map(async (share) => {
@@ -234,20 +234,20 @@ export const retrieveSharedFile = async (
         try {
           const isValid = await PDFSigner.verifySignature(
             decryptedData,
-            owner.publicKey
+            owner.publicKey,
           );
 
           if (!isValid) {
             throw new CustomError(
               StatusCodes.BAD_REQUEST,
-              "PDF signature verification failed"
+              "PDF signature verification failed",
             );
           }
         } catch (error) {
           if (error instanceof CustomError) throw error;
           throw new CustomError(
             StatusCodes.INTERNAL_SERVER_ERROR,
-            `Failed to verify PDF signature: ${error.message}`
+            `Failed to verify PDF signature: ${error.message}`,
           );
         }
       }
