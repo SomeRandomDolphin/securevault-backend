@@ -9,11 +9,13 @@ export const uploadFile = async (req: Request, res: Response) => {
   try {
     const username = (req as UserToken).user.username;
     const encryptionMethod = req.body.encryptionMethod as EncryptionMethod;
+    const password = req.body.password;
     const value = req.file;
     const userFile = await FileService.uploadFile(
       value,
       username,
       encryptionMethod,
+      password,
     );
 
     responseData(res, StatusCodes.OK, "File Uploaded Successfully", userFile);

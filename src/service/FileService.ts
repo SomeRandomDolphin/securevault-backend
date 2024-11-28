@@ -2,7 +2,8 @@ import { StatusCodes } from "http-status-codes";
 import { CustomError } from "../Utils/ErrorHandling";
 import { FileRequest } from "../model/FileModel";
 import { encryptData, decryptData } from "../Utils/Encryption";
-import { queryUserDetailbyUsername } from "../repository/UserRepository";
+import { queryUserDetailbyUsername, queryUserPrivateKeybyUsername } from "../repository/UserRepository";
+import { PDFSigner } from "../Utils/PDFSigner";
 import {
   createFile,
   createFileKey,
@@ -21,6 +22,7 @@ export const uploadFile = async (
   data: FileRequest,
   username: string,
   encryptionMethod: EncryptionMethod,
+  password: string
 ) => {
   if (!encryptionMethod || !supportedAlgorithms.includes(encryptionMethod)) {
     throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid Encryption Method");
@@ -31,14 +33,43 @@ export const uploadFile = async (
     throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
   }
 
+  const userPrivateKey = await queryUserPrivateKeybyUsername(username);
+  if (!userPrivateKey) {
+    throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid User");
+  }
+
   if (!data) {
     throw new CustomError(StatusCodes.BAD_REQUEST, "Invalid File");
+  }
+
+  let processedBuffer: Buffer = data.buffer;
+  if (data.mimetype === "application/pdf") {
+    if (!password) {
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        "Password required for PDF signing"
+      );
+    }
+
+    try {
+      processedBuffer = await PDFSigner.signPDF(
+        data.buffer,
+        userPrivateKey.privateKey,
+        password
+      );
+    } catch (error) {
+      console.log(error);
+      throw new CustomError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        `Failed to sign PDF: ${error.message}`
+      );
+    }
   }
 
   const fileKey = crypto.randomBytes(32);
   const iv = crypto.randomBytes(16);
   const encryptedData = encryptData(
-    data.buffer,
+    processedBuffer,
     fileKey.toString("hex"),
     encryptionMethod,
   );
@@ -145,6 +176,33 @@ export const retrieveFile = async (fileId: string, username: string) => {
   );
 
   return decryptedData;
+  if (file.mimetype === "application/pdf") {
+    try {
+      const owner = await queryUserDetailbyUsername(username);
+      if (!owner) {
+        throw new CustomError(StatusCodes.BAD_REQUEST, "File owner not found");
+      }
+
+      const isValid = await PDFSigner.verifySignature(
+        decryptedData,
+        owner.publicKey
+      );
+
+      if (!isValid) {
+        throw new CustomError(
+          StatusCodes.BAD_REQUEST,
+          "PDF signature verification failed"
+        );
+      }
+    } catch (error) {
+      if (error instanceof CustomError) throw error;
+      throw new CustomError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        `Failed to verify PDF signature: ${error.message}`
+      );
+    }
+  }
+
 };
 
 export const deleteFile = async (fileId: string, username: string) => {
