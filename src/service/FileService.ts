@@ -175,7 +175,6 @@ export const retrieveFile = async (fileId: string, username: string) => {
     file.encryptionMethod,
   );
 
-  return decryptedData;
   if (file.mimetype === "application/pdf") {
     try {
       const owner = await queryUserDetailbyUsername(username);
@@ -203,6 +202,11 @@ export const retrieveFile = async (fileId: string, username: string) => {
     }
   }
 
+  return {
+    data: decryptedData,
+    filename: file.filename,
+    mimetype: file.mimetype,
+  };
 };
 
 export const deleteFile = async (fileId: string, username: string) => {

@@ -61,8 +61,9 @@ export const retrieveFile = async (req: Request, res: Response) => {
     const fileId = req.params.file_id;
     const userFile = await FileService.retrieveFile(fileId, username);
 
-    res.setHeader("Content-Disposition", `attachment; filename="${fileId}"`);
-    res.send(userFile);
+    res.setHeader("Content-Type", userFile.mimetype);
+    res.setHeader("Content-Disposition", `attachment; filename="${userFile.filename}"`);
+    res.send(userFile.data);
   } catch (err) {
     responseError(res, err);
   }
